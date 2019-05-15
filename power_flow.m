@@ -10,13 +10,22 @@
 #      * Para verificar la carga del paquete use el comando 'pkg list'
 
 #Adquisicion de datos
-[NumConfig,TxtConfig] = xlsread('data_io.xlsx', 'CONFIG');
+[~,TxtConfig] = xlsread('data_io.xlsx', 'CONFIG');
+GsFlag = TxtConfig{2,2};                             #Char: "Y" o "N"
+NrFlag = TxtConfig{3,2};                             #Char: "Y" o "N"
+Error = xlsread('data_io.xlsx', 'CONFIG', 'B5');
+MaxIteration = xlsread('data_io.xlsx', 'CONFIG', 'B6');
 Bus = xlsread('data_io.xlsx', 'BUS');
 #[Busi, BusType, abs[V(pu)], arg[V], Pgen(pu), Qgen(pu), Pload(pu), Qload(pu)]
+[~,BusType] = xlsread('data_io.xlsx', 'BUS', 'B2:B1048576'); #Posible arreglo al rango
+#Para acceder BusType{BusNumber,1}   
 Lines = xlsread('data_io.xlsx', 'LINES');
 #[Busi, Busj, R(pu), X(pu), Bshunt(pu)]
 Trx = xlsread('data_io.xlsx', 'TRX');
 #[Busi, Busj, Rcc(pu), Xcc(pu), TAP]
+
+#Construccion de la Y_bus
+Y_bus;
 
 runtime = cputime;                                    #Contador del tiempo de ejecucion del calculo
 #GS
