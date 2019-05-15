@@ -13,14 +13,14 @@ NShunt = 0;
 for (i=1:NLines)
   if (Lines(i,5) != 0)
     NShunt = NShunt + 2;
-  end
-end
+  endif
+endfor
 #Cantidad de admitancias en derivacion de los Trx
 for (i=1:NLines)
   if (Trx(i,5) != 1)
     NShunt = NShunt + 2;
-  end
-end
+  endif
+endfor
 TotalNElements = NElements + NShunt;    #Cantidad de elementos del sistema: EOriginales + EEnDerivacion
 
 #Construccion de la submatriz de impedancias en derivacion
@@ -31,23 +31,23 @@ NodeShunt = zeros(NShunt,2); #Submatriz de barras de conexion de las admitancias
 #Construccion de la submatriz de barras de conexion de las admitancias en derivacion
 k = 1;
 #Barras de conexion de las admitancias en derivacion de las lineas
-for(i=1:NLines)
+for (i=1:NLines)
   if (Lines(i,5) != 0)
     NodeShunt(k,2) = Lines(i,1);
     k = k + 1; 
     NodeShunt(k,2) = Lines(i,2);
     k = k + 1;
-  end
-end
+  endif
+endfor
 #Barras de conexion de las admitancias en derivacion de los Trx
-for(i=1:NTrx)
+for (i=1:NTrx)
   if (Trx(i,5) != 1)
     NodeShunt(k,2) = Lines(i,1);
     k = k + 1; 
     NodeShunt(k,2) = Lines(i,2);
     k = k + 1;
-  end
-end
+  endif
+endfor
 
 #Construccion de la GShunt y BShunt
 k = 1;
@@ -57,8 +57,8 @@ for (i=1:NLines)
         k = k + 1; 
         BShunt(k,1) = sqrt(-1)*1/Lines(i,5);
         k = k + 1;
-    end
-end
+    endif
+endfor
 for (i=1:NTrx)
     if ((Trx(i,5) != 1))
         BShunt(k,1) = sqrt(-1)*((Trx(i,5)*Trx(i,5))-Trx(i,5))*(1/Trx(i,4));
@@ -67,26 +67,27 @@ for (i=1:NTrx)
         BShunt(k,1) = sqrt(-1)*(1-Trx(i,5))*(1/Trx(i,4));
         GShunt(k,1) = sqrt(-1)*(1-Trx(i,5))*(1/Trx(i,3));
         k = k + 1;
-    end
-end
+    endif
+endfor
 
 #Matriz de admitancias en derivacion
-YShunt = GShunt + BShunt
-NodeShunt
+YShunt = GShunt + BShunt;
 
 #Se suman las admitancias en derivacion que estan conectadas a la misma barra
 #(Resolucion de admitancias en paralelo)
-for (i=1:rows(NodeShunt))
-  Nodej = NodeShunt(i,2)
+i = 1;
+while(i <= NShunt)
+  Nodej = NodeShunt(i,2);
   k = i + 1;
-  if (k < rows(NodeShunt)) 
-    for(k=i+1:rows(NodeShunt))
-      if (Nodej == NodeShunt(k,2))
-        YShunt(i) = YShunt(i) + YShunt(k) #Suma del paralelo
-        YShunt(k) = []                    #Se elinan los componentes una vez que se suman
-        NodeShunt(k,:) = []
-      end
-    end
-  end
-end
-
+  while (k <= NShunt)
+    if (Nodej == NodeShunt(k,2))
+      YShunt(i) = YShunt (i) + YShunt(k);
+      YShunt(k) = [];
+      NodeShunt(k,:) = [];
+    endif
+    k = k + 1;
+    NShunt = rows(NodeShunt);
+  endwhile
+  i = i + 1;
+  NShunt = rows(NodeShunt);
+endwhile
