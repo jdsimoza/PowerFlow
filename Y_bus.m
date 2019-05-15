@@ -21,7 +21,6 @@ for (i=1:NLines)
     NShunt = NShunt + 2;
   endif
 endfor
-TotalNElements = NElements + NShunt;    #Cantidad de elementos del sistema: EOriginales + EEnDerivacion
 
 #Construccion de la submatriz de impedancias en derivacion
 GShunt = zeros(NShunt,1); #Conductancia en derivacion
@@ -91,3 +90,28 @@ while(i <= NShunt)
   i = i + 1;
   NShunt = rows(NodeShunt);
 endwhile
+
+#Matriz de admitancias primitivas del sistema
+TotalNElements = NElements + NShunt;    #Cantidad de elementos del sistema: EOriginales + EEnDerivacion
+Yp = zeros(TotalNElements, TotalNElements);
+i = 1;
+k = 1;
+while (i <= NLines)
+  Yp(k,k) = (1/Lines(i,3)) + (1/(sqrt(-1)*Lines(i,4)));
+  i = i + 1;
+  k = k + 1; 
+endwhile
+i = 1;
+while (i <= NTrx)
+  Yp(k,k) = (1/Trx(i,3)) + (1/(sqrt(-1)*Trx(i,4)));
+  i = i + 1;
+  k = k + 1; 
+endwhile
+i = 1;
+while (i <= NShunt)
+  Yp(k,k) = YShunt(i);
+  i = i + 1;
+  k = k + 1; 
+endwhile
+
+#Matriz de incidencia nodal
