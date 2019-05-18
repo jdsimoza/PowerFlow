@@ -17,8 +17,10 @@ for (i=1:NLines)
 endfor
 #Cantidad de admitancias en derivacion de los Trx
 for (i=1:NLines)
-  if (Trx(i,5) != 1)
-    NShunt = NShunt + 2;
+  if (length (Trx) >= 5)  #Solo realiza la operacion si existen Trx en el sistema
+    if (Trx(i,5) != 1)
+      NShunt = NShunt + 2;
+    endif
   endif
 endfor
 
@@ -97,13 +99,13 @@ Yp = zeros(TotalNElements, TotalNElements);
 i = 1;
 k = 1;
 while (i <= NLines)
-  Yp(k,k) = (1/Lines(i,3)) + (1/(sqrt(-1)*Lines(i,4)));
+  Yp(k,k) = 1/(Lines(i,3)+(sqrt(-1)*Lines(i,4)));
   i = i + 1;
   k = k + 1; 
 endwhile
 i = 1;
 while (i <= NTrx)
-  Yp(k,k) = (1/Trx(i,3)) + (1/(sqrt(-1)*Trx(i,4)));
+  Yp(k,k) = 1/(Trx(i,3) + (sqrt(-1)*Trx(i,4)));
   i = i + 1;
   k = k + 1; 
 endwhile
@@ -115,3 +117,33 @@ while (i <= NShunt)
 endwhile
 
 #Matriz de incidencia nodal
+In = zeros(rows(Bus), rows(Bus))
+i = 1;
+k = 1;
+while (i <= NLines)
+  Busi = Lines(i,1);
+  In(k,Busi) = 1;
+  Busj = Lines(i,2);
+  In(k,Busj) = -1;
+  i = i + 1;
+  k = k + 1;  
+endwhile
+i = 1;
+while (i <= NTrx)
+  Busi = Trx(i,1);
+  In(k,Busi) = 1;
+  Busj = Trx(i,2);
+  In(k,Busj) = -1;
+  i = i + 1;
+  k = k + 1;
+endwhile  
+i = 1;
+while (i <= NShunt)
+  Busi = NodeShunt(i,2);
+  In(k,Busi) = -1;
+  i = i + 1;
+  k = k + 1;
+endwhile
+
+InT = transpose(In); #Matriz de incidencia traspuesta
+Ybus = InT*Yp*In
