@@ -117,7 +117,7 @@ while (i <= NShunt)
 endwhile
 
 #Matriz de incidencia nodal
-In = zeros(rows(Bus), rows(Bus))
+In = zeros(TotalNElements, rows(Bus))
 i = 1;
 k = 1;
 while (i <= NLines)
@@ -146,4 +146,4 @@ while (i <= NShunt)
 endwhile
 
 InT = transpose(In); #Matriz de incidencia traspuesta
-Ybus = InT*Yp*In
+Ybus = InT*Yp*In     #Matriz Ybus
