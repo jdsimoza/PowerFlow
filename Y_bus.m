@@ -7,7 +7,9 @@ NLines = rows(Lines);       #Cantidad de Lineas del sistema
 NTrx = rows(Trx);           #Cantidad de Trx del sistema
 NElements = NLines + NTrx;  #Cantidad de elementos del sistema
 
+#########################################################################################
 #Calculo de la cantidad de admitancias en derivacion
+#########################################################################################
 NShunt = 0;
 #Cantidad de admitancias en derivacion de las lineas
 for (i=1:NLines)
@@ -24,7 +26,9 @@ for (i=1:NLines)
   endif
 endfor
 
+#########################################################################################
 #Construccion de la submatriz de impedancias en derivacion
+#########################################################################################
 GShunt = zeros(NShunt,1); #Conductancia en derivacion
 BShunt = zeros(NShunt,1); #Susceptancia en derivacion
 NodeShunt = zeros(NShunt,2); #Submatriz de barras de conexion de las admitancias en derivacion
@@ -74,8 +78,10 @@ endfor
 #Matriz de admitancias en derivacion
 YShunt = GShunt + BShunt;
 
+#########################################################################################
+#Resolucion de admitancias en paralelo
+#########################################################################################
 #Se suman las admitancias en derivacion que estan conectadas a la misma barra
-#(Resolucion de admitancias en paralelo)
 i = 1;
 while(i <= NShunt)
   Nodej = NodeShunt(i,2);
@@ -93,7 +99,9 @@ while(i <= NShunt)
   NShunt = rows(NodeShunt);
 endwhile
 
+#########################################################################################
 #Matriz de admitancias primitivas del sistema
+#########################################################################################
 TotalNElements = NElements + NShunt;    #Cantidad de elementos del sistema: EOriginales + EEnDerivacion
 Yp = zeros(TotalNElements, TotalNElements);
 i = 1;
@@ -116,8 +124,15 @@ while (i <= NShunt)
   k = k + 1; 
 endwhile
 
+#Se calcula una matriz de admitancias primitivas que solo toma en cuenta
+#La parte compleja de las admitancias originales.
+#Esto es necesario para realizar el flujo de carga DC
+Yp_DC = imag(Yp);
+
+#########################################################################################
 #Matriz de incidencia nodal
-In = zeros(TotalNElements, rows(Bus))
+#########################################################################################
+In = zeros(TotalNElements, rows(Bus));
 i = 1;
 k = 1;
 while (i <= NLines)
@@ -145,5 +160,27 @@ while (i <= NShunt)
   k = k + 1;
 endwhile
 
-InT = transpose(In); #Matriz de incidencia traspuesta
-Ybus = InT*Yp*In     #Matriz Ybus
+InT = transpose(In);  #Matriz de incidencia traspuesta
+Ybus = InT*Yp*In;       #Matriz Ybus
+Ybus_DC = Int*Yp_DC*In; #Matriz Ybus para flujo de carga DC
+
+#########################################################################################
+#Limpieza de variables temporales
+#########################################################################################
+clear Busi;
+clear Busj;
+clear BShunt;
+clear GShunt;
+clear In;
+clear InT;
+clear TotalNElements;
+clear NElements;
+clear NLines;
+clear NNodes;
+clear NShunt;
+clear NTrx;
+clear NodeShunt;
+clear Yp;
+clear i;
+clear k;
+clear YShunt;
